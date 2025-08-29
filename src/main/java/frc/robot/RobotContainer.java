@@ -4,18 +4,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.AlgaeShooter;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 
 public class RobotContainer {
   private AlgaeShooter algaeShooter = new AlgaeShooter();
-  private final XboxController m_controller = new XboxController(2);
+  private final CommandXboxController m_controller = new CommandXboxController(2);
   
   public RobotContainer() {
     configureBindings();
@@ -23,10 +22,10 @@ public class RobotContainer {
 
   private void configureBindings() {
     if(!RobotBase.isSimulation()) {
-      new Trigger(() -> m_controller.getAButton())
+      m_controller.a()
       .onTrue(algaeShooter.start()); 
 
-      new Trigger(() -> m_controller.getBButton())
+      m_controller.b()
       .onTrue(algaeShooter.stop());
     }
 
