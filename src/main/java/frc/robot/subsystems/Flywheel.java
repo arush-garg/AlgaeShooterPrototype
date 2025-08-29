@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.*;
 
-public class Flywheel extends SubsystemBase{
+public class Flywheel extends SubsystemBase {
 
     private TalonFX motor;
     private MotionMagicVelocityVoltage motionMagic;
@@ -17,7 +17,7 @@ public class Flywheel extends SubsystemBase{
     public Flywheel(int motorId, TalonFXConfiguration config, double vel, double acc) {
         motor = new TalonFX(motorId, "rio");
         motor.getConfigurator().apply(config);
-        setMMConfig(()->vel, ()->acc);
+        motionMagic = new MotionMagicVelocityVoltage(vel).withAcceleration(acc);
     }
 
     public Command start() {

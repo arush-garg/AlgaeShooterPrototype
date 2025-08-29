@@ -47,7 +47,7 @@ public class AlgaeShooter extends SubsystemBase {
         voltages.PeakReverseVoltage = -ShooterConstants.MAX_VOLTS;
 
         TalonFXConfiguration left_config = new TalonFXConfiguration();
-        left_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        left_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         left_config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         left_config.Voltage = voltages;
         left_config.Slot0 = slot0;
@@ -67,11 +67,11 @@ public class AlgaeShooter extends SubsystemBase {
     }
 
     public Command start() {
-        return Commands.parallel(leftFlywheel.start(), rightFlywheel.start());
+        return Commands.parallel(leftFlywheel.start(), rightFlywheel.start(), new PrintCommand("Flywheel started"));
     }
 
     public Command stop() {
-        return Commands.parallel(leftFlywheel.stop(), rightFlywheel.stop());
+        return Commands.parallel(leftFlywheel.stop(), rightFlywheel.stop(), new PrintCommand("Flywheel stopped"));
     }
 
     public Command setFlywheelConfigs(DoubleSupplier vel, DoubleSupplier acc) {
