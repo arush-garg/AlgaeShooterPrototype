@@ -14,10 +14,10 @@ public class Flywheel extends SubsystemBase{
     private MotionMagicVelocityVoltage motionMagic;
 
 
-    public Flywheel(int motorId, TalonFXConfiguration config, double maxVel, double maxAcc) {
+    public Flywheel(int motorId, TalonFXConfiguration config, double vel, double acc) {
         motor = new TalonFX(motorId, "rio");
         motor.getConfigurator().apply(config);
-        setMMConfig(()->maxVel, ()->maxAcc);
+        setMMConfig(()->vel, ()->acc);
     }
 
     public Command start() {
@@ -32,9 +32,9 @@ public class Flywheel extends SubsystemBase{
         });
     }
 
-    public Command setMMConfig(DoubleSupplier maxVel, DoubleSupplier maxAcc) {
+    public Command setMMConfig(DoubleSupplier vel, DoubleSupplier acc) {
         return this.runOnce(() -> {
-            motionMagic = new MotionMagicVelocityVoltage(maxVel.getAsDouble()).withAcceleration(maxAcc.getAsDouble());
+            motionMagic = new MotionMagicVelocityVoltage(vel.getAsDouble()).withAcceleration(acc.getAsDouble());
         });
     }
 

@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.signals.*;
 
 import badgerlog.Dashboard;
@@ -14,11 +14,14 @@ import frc.robot.constants.ShooterConstants;
 
 public class AlgaeShooter extends SubsystemBase {
     @Entry(EntryType.Subscriber)
-    private static double MAX_VEL = 50;
+    private static double targVel = 50;
 
-    /** In rotations per second<sup>2</sup> */
+    /** In rotations per second squared */
     @Entry(EntryType.Subscriber)
-    private static double MAX_ACC = 25;
+    private static double targAcc = 25;
+
+    @Entry(EntryType.Subscriber)
+    private static double kS = ShooterConstants.kS, kV = ShooterConstants.kV, kA = ShooterConstants.kA, kG = ShooterConstants.kG, kP = ShooterConstants.kP, kI = ShooterConstants.kI, kD = ShooterConstants.kD;
 
     @Entry(EntryType.Publisher)
     private static double leftMotorVel = 0;
@@ -30,23 +33,36 @@ public class AlgaeShooter extends SubsystemBase {
     private final Flywheel rightFlywheel;
 
     public AlgaeShooter() {
+        Slot0Configs slot0 = new Slot0Configs();
+        slot0.kS = kS;
+        slot0.kV = kV;
+        slot0.kA = kA;
+        slot0.kG = kG;
+        slot0.kP = kP;
+        slot0.kI = kI;
+        slot0.kD = kD;
+
+        VoltageConfigs voltages = new VoltageConfigs();
+        voltages.PeakForwardVoltage = ShooterConstants.MAX_VOLTS;
+        voltages.PeakReverseVoltage = -ShooterConstants.MAX_VOLTS;
+
         TalonFXConfiguration left_config = new TalonFXConfiguration();
         left_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         left_config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        left_config.Voltage.PeakForwardVoltage = ShooterConstants.MAX_VOLTS;
-        left_config.Voltage.PeakReverseVoltage = -ShooterConstants.MAX_VOLTS;
-        leftFlywheel = new Flywheel(ShooterConstants.SHOOTER_LEFT_ID, left_config, MAX_VEL, MAX_ACC);
+        left_config.Voltage = voltages;
+        left_config.Slot0 = slot0;
+        leftFlywheel = new Flywheel(ShooterConstants.SHOOTER_LEFT_ID, left_config, targVel, targAcc);
 
         TalonFXConfiguration right_config = new TalonFXConfiguration();
         right_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         right_config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        right_config.Voltage.PeakForwardVoltage = ShooterConstants.MAX_VOLTS;
-        right_config.Voltage.PeakReverseVoltage = -ShooterConstants.MAX_VOLTS;
-        rightFlywheel = new Flywheel(ShooterConstants.SHOOTER_RIGHT_ID, right_config, MAX_VEL, MAX_ACC);
+        right_config.Voltage = voltages;
+        right_config.Slot0 = slot0;
+        rightFlywheel = new Flywheel(ShooterConstants.SHOOTER_RIGHT_ID, right_config, targVel, targAcc);
 
         EventLoop buttonLoop = CommandScheduler.getInstance().getDefaultButtonLoop();
         Dashboard.getAutoResettingButton("AlgaeShooter/Apply config", buttonLoop)
-                .onTrue(setFlywheelConfigs(() -> MAX_VEL, () -> MAX_ACC).ignoringDisable(true));
+                .onTrue(setFlywheelConfigs(() -> targVel, () -> targAcc).ignoringDisable(true));
 
     }
 
@@ -58,11 +74,11 @@ public class AlgaeShooter extends SubsystemBase {
         return Commands.parallel(leftFlywheel.stop(), rightFlywheel.stop());
     }
 
-    public Command setFlywheelConfigs(DoubleSupplier maxVel, DoubleSupplier maxAcc) {
+    public Command setFlywheelConfigs(DoubleSupplier vel, DoubleSupplier acc) {
         return Commands.parallel(
-            leftFlywheel.setMMConfig(maxVel, maxAcc),
-            rightFlywheel.setMMConfig(maxVel, maxAcc),
-            Commands.runOnce(() -> System.out.printf("Applied max vel = %.2f, max acc = %.2f%n", maxVel.getAsDouble(), maxAcc.getAsDouble()))
+            leftFlywheel.setMMConfig(vel, acc),
+            rightFlywheel.setMMConfig(vel, acc),
+            Commands.runOnce(() -> System.out.printf("Applied max vel = %.2f, max acc = %.2f%n", vel.getAsDouble(), acc.getAsDouble()))
         );
     }
 
