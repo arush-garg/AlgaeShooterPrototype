@@ -14,7 +14,7 @@ import frc.robot.constants.ShooterConstants;
 
 public class AlgaeShooter extends SubsystemBase {
     @Entry(EntryType.Subscriber)
-    private static double targVel = 50;
+    private static double targVel = 22;
 
     /** In rotations per second squared */
     @Entry(EntryType.Subscriber)
